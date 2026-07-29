@@ -1,0 +1,15 @@
+.env
+
+# Live server data — not committed
+data/
+
+# Keep backups dir but ignore everything except the tracked files
+backups/*
+!backups/latest.tar.zst
+!backups/manifest.json
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+playit.yml

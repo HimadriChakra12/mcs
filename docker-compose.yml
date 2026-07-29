@@ -1,0 +1,67 @@
+include:
+  - playit.yml
+services:
+  minecraft:
+    image: itzg/minecraft-server:latest
+    container_name: minecraft
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    ports:
+      - "25565:25565"
+    environment:
+      EULA: "TRUE"
+      TYPE: paper
+      VERSION: ${MC_VERSION:-LATEST}
+      MEMORY: ${MC_MEMORY:-2G}
+      TZ: ${TZ:-UTC}
+      RCON_PORT: "25575"
+      RCON_PASSWORD: ${RCON_PASSWORD:-changeme}
+      ENABLE_RCON: "true"
+      OVERRIDE_SERVER_PROPERTIES: "true"
+      ALLOW_NETHER: "true"
+      GENERATE_STRUCTURES: "true"
+      LEVEL_TYPE: DEFAULT
+      VIEW_DISTANCE: 10
+      MAX_PLAYERS: ${MAX_PLAYERS:-20}
+      MOTD: ${MOTD:-A Minecraft Server}
+      WHITELIST_ENABLED: ${WHITELIST_ENABLED:-false}
+      OPS: ${OPS:-}
+      WHITELIST: ${WHITELIST:-}
+    volumes:
+      - ./data:/data
+      - ./config/plugins:/plugins:ro
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD", "mc-health"]
+      retries: 5
+      start_period: 120s
+      interval: 30s
+      timeout: 10s
+
+  backup:
+    image: alpine:3.20
+    container_name: minecraft-backup
+    restart: unless-stopped
+    depends_on:
+      minecraft:
+        condition: service_started
+    environment:
+      TZ: ${TZ:-UTC}
+      BACKUP_INTERVAL: ${BACKUP_INTERVAL:-3600}
+      RCON_PASSWORD: ${RCON_PASSWORD:-changeme}
+      GIT_AUTO_PUSH: ${GIT_AUTO_PUSH:-false}
+      DISCORD_WEBHOOK: ${DISCORD_WEBHOOK:-}
+    volumes:
+      - ./data:/data:ro
+      - ./backups:/backups
+      - ./scripts:/scripts:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        apk add --no-cache zstd docker-cli rcon-cli bash coreutils git curl && \
+        while true; do
+          bash /scripts/backup.sh
+          sleep $${BACKUP_INTERVAL:-3600}
+        done
