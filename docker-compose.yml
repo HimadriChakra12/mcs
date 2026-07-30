@@ -11,8 +11,8 @@ services:
       - "25565:25565"
     environment:
       EULA: "TRUE"
-      TYPE: paper
-      VERSION: ${MC_VERSION:-LATEST}
+      TYPE: FABRIC
+      VERSION: 26.2
       MEMORY: ${MC_MEMORY:-2G}
       TZ: ${TZ:-UTC}
       RCON_PORT: "25575"
