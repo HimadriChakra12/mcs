@@ -22,22 +22,50 @@ services:
       ALLOW_NETHER: "true"
       GENERATE_STRUCTURES: "true"
       LEVEL_TYPE: DEFAULT
-      VIEW_DISTANCE: 10
+      VIEW_DISTANCE: ${VIEW_DISTANCE:-8}
+      SIMULATION_DISTANCE: ${SIMULATION_DISTANCE:-6}
       MAX_PLAYERS: ${MAX_PLAYERS:-20}
       MOTD: ${MOTD:-A Minecraft Server}
-      WHITELIST_ENABLED: ${WHITELIST_ENABLED:-false}
+      ENABLE_WHITELIST: ${ENABLE_WHITELIST:-false}   # fixed
       OPS: ${OPS:-}
       WHITELIST: ${WHITELIST:-}
+      EXISTING_WHITELIST_FILE: SKIP
+
+      # Aikar's JVM flags — reduces GC pauses significantly
+      JVM_OPTS: >-
+        -XX:+UseG1GC
+        -XX:+ParallelRefProcEnabled
+        -XX:MaxGCPauseMillis=200
+        -XX:+UnlockExperimentalVMOptions
+        -XX:+DisableExplicitGC
+        -XX:+AlwaysPreTouch
+        -XX:G1NewSizePercent=30
+        -XX:G1MaxNewSizePercent=40
+        -XX:G1HeapRegionSize=8M
+        -XX:G1ReservePercent=20
+        -XX:G1HeapWastePercent=5
+        -XX:G1MixedGCCountTarget=4
+        -XX:InitiatingHeapOccupancyPercent=15
+        -XX:G1MixedGCLiveThresholdPercent=90
+        -XX:G1RSetUpdatingPauseTimePercent=5
+        -XX:SurvivorRatio=32
+        -XX:+PerfDisableSharedMem
+        -XX:MaxTenuringThreshold=1
+
+      # Pause JVM when no players online — good for laptop hosting
+      ENABLE_AUTOPAUSE: "true"
+      AUTOPAUSE_TIMEOUT_EST: 3600
+      AUTOPAUSE_TIMEOUT_INIT: 300
+      MAX_TICK_TIME: -1
+
+      # Mods via Modrinth — auto-downloaded and kept up to date
+      MODRINTH_PROJECTS: "fabric-api,lithium?,ferrite-core,krypton,c2me-fabric:alpha,scalablelux,spark,clumps?"
+
     volumes:
       - ./data:/data
-      - ./config/plugins:/plugins:ro
+      - ./config:/config          # syncs into /data/config/
+      - ./mods:/mods              # fixed: was /plugins
       - ./backups:/backups
-    healthcheck:
-      test: ["CMD", "mc-health"]
-      retries: 5
-      start_period: 120s
-      interval: 30s
-      timeout: 10s
 
   backup:
     image: alpine:3.20
