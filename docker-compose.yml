@@ -15,6 +15,7 @@ services:
       VERSION: 26.2
       MEMORY: ${MC_MEMORY:-2G}
       TZ: ${TZ:-UTC}
+      ONLINE_MODE: ${ONLINE_MODE:-false}
       RCON_PORT: "25575"
       RCON_PASSWORD: ${RCON_PASSWORD:-changeme}
       ENABLE_RCON: "true"
@@ -68,7 +69,9 @@ services:
       - ./backups:/backups
 
   backup:
-    image: alpine:3.20
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile.backup
     container_name: minecraft-backup
     restart: unless-stopped
     depends_on:
@@ -88,7 +91,7 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        apk add --no-cache zstd docker-cli rcon-cli bash coreutils git curl && \
+        apk add --no-cache zstd docker-cli rcon-cli coreutils git curl && \
         while true; do
           bash /scripts/backup.sh
           sleep $${BACKUP_INTERVAL:-3600}

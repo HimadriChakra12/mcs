@@ -1,0 +1,7 @@
+FROM alpine:3.20
+RUN apk add --no-cache bash zstd docker-cli coreutils git curl
+
+# Install rcon-cli from GitHub releases
+RUN curl -fsSL https://github.com/itzg/rcon-cli/releases/download/1.6.4/rcon-cli_1.6.4_linux_amd64.tar.gz \
+    | tar -xz -C /usr/local/bin rcon-cli && \
+    chmod +x /usr/local/bin/rcon-cli

@@ -22,11 +22,11 @@ log "Sending save-all flush to server..."
 rcon-cli --host minecraft --port 25575 --password "${RCON_PASSWORD}" \
   "save-all flush" 2>/dev/null || warn "RCON unavailable, skipping save-all"
 
-sleep 3  # allow flush to complete
+sleep 3
 
-# ── Detect Minecraft version from version_manifest ────────────────────────────
+# ── Detect Minecraft version ───────────────────────────────────────────────────
 MC_VERSION=$(cat /data/version.json 2>/dev/null | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4 || echo "unknown")
-SERVER_TYPE="PAPER"
+SERVER_TYPE="FABRIC"
 
 # ── Compress world data ────────────────────────────────────────────────────────
 log "Compressing world data..."
@@ -41,9 +41,7 @@ if [[ ${#DIRS[@]} -eq 0 ]]; then
 fi
 
 cd "${DATA_DIR}"
-tar --use-compress-program="zstd -T0 -3" \
-    -cf "${BACKUP_FILE}" \
-    "${DIRS[@]}"
+tar -cf - "${DIRS[@]}" | zstd -T0 -3 -f -o "${BACKUP_FILE}"
 
 # ── SHA256 + manifest ─────────────────────────────────────────────────────────
 SHA256=$(sha256sum "${BACKUP_FILE}" | awk '{print $1}')

@@ -15,7 +15,7 @@ DATA_DIR="data"
 
 # ── Verify SHA256 ──────────────────────────────────────────────────────────────
 log "Verifying archive integrity..."
-EXPECTED=$(grep -o '"sha256":"[^"]*"' "${MANIFEST}" | cut -d'"' -f4)
+EXPECTED=$(grep -o '"sha256": *"[^"]*"' "${MANIFEST}" | grep -o '[a-f0-9]\{64\}')
 ACTUAL=$(sha256sum "${BACKUP_FILE}" | awk '{print $1}')
 [[ "${EXPECTED}" == "${ACTUAL}" ]] || err "SHA256 mismatch! Backup may be corrupt."
 ok "Checksum verified"
@@ -37,7 +37,7 @@ done
 
 # ── Extract ───────────────────────────────────────────────────────────────────
 log "Extracting backup..."
-tar --use-compress-program="zstd -d" -xf "${BACKUP_FILE}" -C "${DATA_DIR}/"
+zstd -d -c "${BACKUP_FILE}" | tar -xf - -C "${DATA_DIR}/"
 
 ok "World data restored from $(grep -o '"created":"[^"]*"' "${MANIFEST}" | cut -d'"' -f4)"
 
