@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "created": "2026-08-07T22:14:47Z",
+  "created": "2026-08-14T23:32:29Z",
   "minecraft_version": "unknown",
   "server_type": "FABRIC",
-  "size": 50163922,
-  "sha256": "06b9d80b68b25acd80fc39bf02f05c9d30f8012b208b8697f7e1d837ef04a2da",
+  "size": 51506651,
+  "sha256": "5b0e6466ae8bd6d32b584c0cacf78b90203b6f4d187297518c444b9fb79f3b94",
   "backup_tool_version": "1.0.0"
 }
